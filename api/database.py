@@ -1,7 +1,8 @@
 import sqlite3
 
-conn = sqlite3.connect("invoice-pipeline.db")
+DB_PATH = "invoice-pipeline.db"
 
-conn = conn.cursor()
-
-print("Connected successfully")
+def get_conn():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn

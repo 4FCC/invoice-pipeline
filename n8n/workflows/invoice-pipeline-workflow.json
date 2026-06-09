@@ -1,0 +1,397 @@
+{
+  "name": "invoice-pipeline-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "PAGO",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n  <title>Overdue Payment Notice</title>\n  <style>\n    * { margin: 0; padding: 0; box-sizing: border-box; }\n    body {\n      background-color: #0a0908;\n      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;\n      padding: 48px 16px;\n    }\n    .wrapper { max-width: 520px; margin: 0 auto; }\n\n    .strip {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding-bottom: 20px;\n      border-bottom: 1px solid #22333b;\n      margin-bottom: 40px;\n    }\n    .strip-brand {\n      font-size: 11px;\n      font-weight: 700;\n      color: #c6ac8f;\n      letter-spacing: 0.14em;\n      text-transform: uppercase;\n    }\n    .strip-tag {\n      font-size: 11px;\n      color: #5e503f;\n      letter-spacing: 0.08em;\n      text-transform: uppercase;\n    }\n\n    .alert-bar {\n      border: 1px solid #22333b;\n      border-left: 3px solid #c6ac8f;\n      padding: 14px 18px;\n      margin-bottom: 40px;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n    }\n    .alert-bar-text {\n      font-size: 11px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.1em;\n    }\n    .alert-bar-reminder {\n      font-size: 11px;\n      color: #c6ac8f;\n      letter-spacing: 0.08em;\n      text-transform: uppercase;\n      font-weight: 700;\n    }\n\n    .center {\n      text-align: center;\n      margin-bottom: 48px;\n    }\n    .center-label {\n      font-size: 11px;\n      color: #5e503f;\n      letter-spacing: 0.12em;\n      text-transform: uppercase;\n      margin-bottom: 14px;\n    }\n    .center-amount {\n      font-size: 64px;\n      font-weight: 700;\n      color: #eae0d5;\n      line-height: 1;\n      letter-spacing: -0.02em;\n      margin-bottom: 12px;\n    }\n    .center-days {\n      font-size: 13px;\n      color: #5e503f;\n      letter-spacing: 0.04em;\n    }\n    .center-days span {\n      color: #eae0d5;\n      font-weight: 700;\n    }\n\n    .list { border-top: 1px solid #22333b; }\n    .list-row {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      padding: 13px 0;\n      border-bottom: 1px solid #22333b;\n    }\n    .list-key {\n      font-size: 11px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.1em;\n    }\n    .list-val {\n      font-size: 13px;\n      color: #eae0d5;\n      font-weight: 500;\n      text-align: right;\n    }\n\n    .message {\n      margin: 36px 0;\n      padding: 24px;\n      border: 1px solid #22333b;\n    }\n    .message-name {\n      font-size: 14px;\n      font-weight: 600;\n      color: #eae0d5;\n      margin-bottom: 12px;\n    }\n    .message-body {\n      font-size: 13px;\n      color: #5e503f;\n      line-height: 1.8;\n    }\n\n    .cta {\n      margin-top: 36px;\n      padding-top: 24px;\n      border-top: 1px solid #22333b;\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      gap: 20px;\n    }\n    .cta-note {\n      font-size: 11px;\n      color: #5e503f;\n      line-height: 1.6;\n    }\n    .cta-btn {\n      display: inline-block;\n      background-color: #eae0d5;\n      color: #0a0908;\n      text-decoration: none;\n      font-size: 11px;\n      font-weight: 700;\n      letter-spacing: 0.1em;\n      text-transform: uppercase;\n      padding: 12px 20px;\n      border-radius: 2px;\n      white-space: nowrap;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n\n    <div class=\"strip\">\n      <div class=\"strip-brand\">Invoice Pipeline</div>\n      <div class=\"strip-tag\">Overdue notice</div>\n    </div>\n\n    <div class=\"alert-bar\">\n      <div class=\"alert-bar-text\">Action required · Payment overdue</div>\n      <div class=\"alert-bar-reminder\">Reminder #{{ $json.reminder_number }}</div>\n    </div>\n\n    <div class=\"center\">\n      <div class=\"center-label\">Outstanding balance</div>\n      <div class=\"center-amount\">${{ $json.amount }}</div>\n      <div class=\"center-days\">\n        <span>{{ $json.days_overdue }}</span> days past due · was due {{ $json.due_date }}\n      </div>\n    </div>\n\n    <div class=\"list\">\n      <div class=\"list-row\">\n        <div class=\"list-key\">Invoice</div>\n        <div class=\"list-val\">#{{ $json.invoice_id }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Client</div>\n        <div class=\"list-val\">{{ $json.name }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Company</div>\n        <div class=\"list-val\">{{ $json.company }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Original due date</div>\n        <div class=\"list-val\">{{ $json.due_date }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Days overdue</div>\n        <div class=\"list-val\">{{ $json.days_overdue }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Status</div>\n        <div class=\"list-val\" style=\"color: #c6ac8f; font-weight: 700;\">Overdue</div>\n      </div>\n    </div>\n\n    <div class=\"message\">\n      <div class=\"message-name\">{{ $json.name }},</div>\n      <div class=\"message-body\">\n        This is reminder #{{ $json.reminder_number }} for invoice #{{ $json.invoice_id }}.\n        Your account currently has an outstanding balance of ${{ $json.amount }} that was\n        due on {{ $json.due_date }}. Immediate payment is required to avoid further action.\n        If you have already submitted payment, please disregard this notice and confirm\n        by replying to this email.\n      </div>\n    </div>\n\n    <div class=\"cta\">\n      <div class=\"cta-note\">\n        Continued non-payment may result in service suspension.<br/>\n        Contact billing to resolve this immediately.\n      </div>\n      <a class=\"cta-btn\" href=\"mailto:billing@invoice-pipeline.com\">\n        Resolve now →\n      </a>\n    </div>\n\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        32
+      ],
+      "id": "f6e0c2db-7104-4cef-adbf-cff4ccd892cc",
+      "name": "Send a message",
+      "webhookId": "b48cc3ee-953b-4e68-b48b-b83d6d876d69",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CiFvLis362JeVgoX",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -352
+      ],
+      "id": "638a29c7-3c58-473d-8ff1-ce5045879c01",
+      "name": "Trigger-REPORT"
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.0.9:8000/invoices/overdue",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "a7b02052-5407-4f99-a0fd-cd033d510171",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.0.9:8000/reminders/log-overdue",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "invoice_id",
+              "value": "={{ $('HTTP Request').item.json.invoice_id }}"
+            },
+            {
+              "name": "reminder_number",
+              "value": "={{ $('HTTP Request').item.json.reminder_number }}"
+            },
+            {
+              "name": "email_body",
+              "value": "=Reminder #{{ $('HTTP Request').item.json.reminder_number }} sent to {{ $('HTTP Request').item.json.name }} for invoice #{{ $('HTTP Request').item.json.invoice_id }} — ${{ $('HTTP Request').item.json.amount }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        32
+      ],
+      "id": "1abd0a98-888e-436e-aab3-98ac7114133a",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.0.9:8000/report/weekly",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        -352
+      ],
+      "id": "0be36b13-01ed-445a-ac94-670ab40d5ddc",
+      "name": "HTTP Request2",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "example@gmail.com",
+        "subject": "Pago",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n  <title>Weekly Report</title>\n  <style>\n    * { margin: 0; padding: 0; box-sizing: border-box; }\n    body {\n      background-color: #0a0908;\n      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;\n      padding: 48px 16px;\n    }\n    .wrapper { max-width: 520px; margin: 0 auto; }\n\n    .strip {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding-bottom: 20px;\n      border-bottom: 1px solid #22333b;\n      margin-bottom: 40px;\n    }\n    .strip-brand {\n      font-size: 11px;\n      font-weight: 700;\n      color: #c6ac8f;\n      letter-spacing: 0.14em;\n      text-transform: uppercase;\n    }\n    .strip-tag {\n      font-size: 11px;\n      color: #5e503f;\n      letter-spacing: 0.08em;\n      text-transform: uppercase;\n    }\n\n    .report-header {\n      margin-bottom: 40px;\n    }\n    .report-title {\n      font-size: 24px;\n      font-weight: 600;\n      color: #eae0d5;\n      margin-bottom: 6px;\n    }\n    .report-week {\n      font-size: 12px;\n      color: #5e503f;\n      letter-spacing: 0.06em;\n    }\n\n    .grid {\n      display: grid;\n      grid-template-columns: 1fr 1fr;\n      gap: 1px;\n      background-color: #22333b;\n      margin-bottom: 1px;\n    }\n    .grid-cell {\n      background-color: #0a0908;\n      padding: 20px;\n    }\n    .grid-cell.full {\n      grid-column: span 2;\n    }\n    .cell-label {\n      font-size: 10px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.1em;\n      margin-bottom: 8px;\n    }\n    .cell-value {\n      font-size: 28px;\n      font-weight: 700;\n      color: #eae0d5;\n      line-height: 1;\n      margin-bottom: 4px;\n    }\n    .cell-sub {\n      font-size: 11px;\n      color: #5e503f;\n    }\n    .cell-value.accent { color: #c6ac8f; }\n\n    .section-title {\n      font-size: 10px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.12em;\n      margin: 32px 0 14px;\n    }\n\n    .list { border-top: 1px solid #22333b; }\n    .list-row {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      padding: 13px 0;\n      border-bottom: 1px solid #22333b;\n    }\n    .list-key {\n      font-size: 11px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.08em;\n    }\n    .list-val {\n      font-size: 13px;\n      color: #eae0d5;\n      font-weight: 500;\n    }\n\n    .bar-block { margin: 32px 0; }\n    .bar-label {\n      display: flex;\n      justify-content: space-between;\n      font-size: 11px;\n      color: #5e503f;\n      margin-bottom: 8px;\n      text-transform: uppercase;\n      letter-spacing: 0.08em;\n    }\n    .bar-track {\n      background-color: #22333b;\n      height: 3px;\n      width: 100%;\n    }\n    .bar-fill {\n      background-color: #c6ac8f;\n      height: 100%;\n      width: {{ $json.reminders_this_week.total }}%;\n    }\n\n    .footer-note {\n      padding-top: 24px;\n      border-top: 1px solid #22333b;\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n    }\n    .footer-brand {\n      font-size: 11px;\n      font-weight: 700;\n      color: #c6ac8f;\n      letter-spacing: 0.1em;\n      text-transform: uppercase;\n    }\n    .footer-date {\n      font-size: 11px;\n      color: #5e503f;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n\n    <div class=\"strip\">\n      <div class=\"strip-brand\">Invoice Pipeline</div>\n      <div class=\"strip-tag\">Weekly report</div>\n    </div>\n\n    <div class=\"report-header\">\n      <div class=\"report-title\">Weekly summary</div>\n      <div class=\"report-week\">{{ $json.week }}</div>\n    </div>\n\n    <div class=\"grid\">\n      <div class=\"grid-cell\">\n        <div class=\"cell-label\">Overdue amount</div>\n        <div class=\"cell-value accent\">${{ $json.overdue.total_amount }}</div>\n        <div class=\"cell-sub\">{{ $json.overdue.total_invoices }} invoices</div>\n      </div>\n      <div class=\"grid-cell\">\n        <div class=\"cell-label\">Pending amount</div>\n        <div class=\"cell-value\">${{ $json.pending.total_amount }}</div>\n        <div class=\"cell-sub\">{{ $json.pending.total_invoices }} invoices</div>\n      </div>\n      <div class=\"grid-cell\">\n        <div class=\"cell-label\">Paid this week</div>\n        <div class=\"cell-value\">${{ $json.paid_this_week.total_amount }}</div>\n        <div class=\"cell-sub\">{{ $json.paid_this_week.total_invoices }} invoices</div>\n      </div>\n      <div class=\"grid-cell\">\n        <div class=\"cell-label\">Reminders sent</div>\n        <div class=\"cell-value\">{{ $json.reminders_this_week.total }}</div>\n        <div class=\"cell-sub\">this week</div>\n      </div>\n    </div>\n\n    <div class=\"section-title\">Reminder breakdown</div>\n    <div class=\"list\">\n      <div class=\"list-row\">\n        <div class=\"list-key\">Overdue reminders</div>\n        <div class=\"list-val\">{{ $json.reminders_this_week.overdue }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Pending reminders</div>\n        <div class=\"list-val\">{{ $json.reminders_this_week.pending }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Total sent</div>\n        <div class=\"list-val\">{{ $json.reminders_this_week.total }}</div>\n      </div>\n    </div>\n\n    <div class=\"bar-block\">\n      <div class=\"bar-label\">\n        <span>Reminder activity</span>\n        <span>{{ $json.reminders_this_week.total }} sent</span>\n      </div>\n      <div class=\"bar-track\">\n        <div class=\"bar-fill\"></div>\n      </div>\n    </div>\n\n    <div class=\"footer-note\">\n      <div class=\"footer-brand\">Invoice Pipeline</div>\n      <div class=\"footer-date\">Auto-generated · Every Monday 8:00 AM</div>\n    </div>\n\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -352
+      ],
+      "id": "df646e6e-fce2-4d41-aed3-52281ba9a9b9",
+      "name": "Send a message1",
+      "webhookId": "b6c68425-009d-4b83-8fd4-e4c053b8665c",
+      "retryOnFail": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CiFvLis362JeVgoX",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "PAGO",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n  <title>Upcoming Payment Reminder</title>\n  <style>\n    * { margin: 0; padding: 0; box-sizing: border-box; }\n    body {\n      background-color: #0a0908;\n      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;\n      padding: 48px 16px;\n    }\n    .wrapper { max-width: 520px; margin: 0 auto; }\n\n    .strip {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding-bottom: 20px;\n      border-bottom: 1px solid #22333b;\n      margin-bottom: 40px;\n    }\n    .strip-brand {\n      font-size: 11px;\n      font-weight: 700;\n      color: #c6ac8f;\n      letter-spacing: 0.14em;\n      text-transform: uppercase;\n    }\n    .strip-tag {\n      font-size: 11px;\n      color: #5e503f;\n      letter-spacing: 0.08em;\n      text-transform: uppercase;\n    }\n\n    .greeting-block {\n      margin-bottom: 40px;\n    }\n    .greeting-hi {\n      font-size: 28px;\n      font-weight: 600;\n      color: #eae0d5;\n      margin-bottom: 10px;\n    }\n    .greeting-sub {\n      font-size: 13px;\n      color: #5e503f;\n      line-height: 1.75;\n    }\n\n    .center {\n      text-align: center;\n      margin-bottom: 48px;\n      padding: 32px 24px;\n      border: 1px solid #22333b;\n    }\n    .center-label {\n      font-size: 11px;\n      color: #5e503f;\n      letter-spacing: 0.12em;\n      text-transform: uppercase;\n      margin-bottom: 14px;\n    }\n    .center-amount {\n      font-size: 56px;\n      font-weight: 700;\n      color: #eae0d5;\n      line-height: 1;\n      letter-spacing: -0.02em;\n      margin-bottom: 14px;\n    }\n    .center-pill {\n      display: inline-block;\n      background-color: #22333b;\n      color: #c6ac8f;\n      font-size: 12px;\n      font-weight: 600;\n      padding: 6px 16px;\n      border-radius: 20px;\n      letter-spacing: 0.06em;\n    }\n\n    .list { border-top: 1px solid #22333b; margin-bottom: 36px; }\n    .list-row {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      padding: 13px 0;\n      border-bottom: 1px solid #22333b;\n    }\n    .list-key {\n      font-size: 11px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.1em;\n    }\n    .list-val {\n      font-size: 13px;\n      color: #eae0d5;\n      font-weight: 500;\n      text-align: right;\n    }\n\n    .note {\n      font-size: 13px;\n      color: #5e503f;\n      line-height: 1.8;\n      margin-bottom: 36px;\n      padding-left: 14px;\n      border-left: 2px solid #22333b;\n    }\n\n    .cta {\n      padding-top: 24px;\n      border-top: 1px solid #22333b;\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      gap: 20px;\n    }\n    .cta-note {\n      font-size: 11px;\n      color: #5e503f;\n      line-height: 1.6;\n    }\n    .cta-btn {\n      display: inline-block;\n      background-color: #c6ac8f;\n      color: #0a0908;\n      text-decoration: none;\n      font-size: 11px;\n      font-weight: 700;\n      letter-spacing: 0.1em;\n      text-transform: uppercase;\n      padding: 12px 20px;\n      border-radius: 2px;\n      white-space: nowrap;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n\n    <div class=\"strip\">\n      <div class=\"strip-brand\">Invoice Pipeline</div>\n      <div class=\"strip-tag\">Friendly reminder</div>\n    </div>\n\n    <div class=\"greeting-block\">\n      <div class=\"greeting-hi\">Hey, {{ $json.name }} 👋</div>\n      <div class=\"greeting-sub\">\n        Just a heads-up — you have an upcoming payment due soon.\n        No action needed right now, we just want to make sure you're prepared.\n      </div>\n    </div>\n\n    <div class=\"center\">\n      <div class=\"center-label\">Amount due</div>\n      <div class=\"center-amount\">${{ $json.amount }}</div>\n      <div class=\"center-pill\">Due in {{ $json.days_until_due }} days · {{ $json.due_date }}</div>\n    </div>\n\n    <div class=\"list\">\n      <div class=\"list-row\">\n        <div class=\"list-key\">Invoice</div>\n        <div class=\"list-val\">#{{ $json.invoice_id }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Company</div>\n        <div class=\"list-val\">{{ $json.company }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Due date</div>\n        <div class=\"list-val\">{{ $json.due_date }}</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Days remaining</div>\n        <div class=\"list-val\">{{ $json.days_until_due }} days</div>\n      </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Status</div>\n        <div class=\"list-val\" style=\"color: #c6ac8f;\">Pending</div>\n      </div>\n    </div>\n\n    <div class=\"note\">\n      If you have any questions about this invoice or need to discuss\n      payment arrangements, we're happy to help. Just reach out to our\n      billing team and we'll sort it out together.\n    </div>\n\n    <div class=\"cta\">\n      <div class=\"cta-note\">\n        Questions or need to adjust your payment?<br/>\n        We're here to help.\n      </div>\n      <a class=\"cta-btn\" href=\"mailto:billing@invoice-pipeline.com\">\n        Contact us →\n      </a>\n    </div>\n\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        224
+      ],
+      "id": "fd8eb6d4-72af-4264-8406-98fe081688aa",
+      "name": "Send a message2",
+      "webhookId": "b48cc3ee-953b-4e68-b48b-b83d6d876d69",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CiFvLis362JeVgoX",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.0.9:8000/invoices/pending",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        176
+      ],
+      "id": "a07be30e-9551-436f-9d42-4c400370095e",
+      "name": "HTTP Request3",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.0.9:8000/reminders/log-pending",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "invoice_id",
+              "value": "={{ $('HTTP Request3').item.json.invoice_id }}"
+            },
+            {
+              "name": "days_until_due",
+              "value": "={{ $('HTTP Request3').item.json.days_until_due }}"
+            },
+            {
+              "name": "email_body",
+              "value": "=Pending reminder sent to {{ $('HTTP Request3').item.json.name }} for invoice #{{ $('HTTP Request3').item.json.invoice_id }} — ${{ $('HTTP Request3').item.json.amount }} due in {{ $('HTTP Request3').item.json.days_until_due }} days"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        224
+      ],
+      "id": "f0ced2ea-f118-4bfb-ac1e-3dd18346d7ee",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        176
+      ],
+      "id": "02a2f9b1-4066-4492-b7c9-77dbaac88937",
+      "name": "Trigger-PENDING"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -112
+      ],
+      "id": "0e6e4e78-fbc1-4699-b6b3-7d4691edba9a",
+      "name": "Trigger-OVERDUE"
+    },
+    {
+      "parameters": {
+        "sendTo": "example@gmail.com",
+        "subject": "ERROR",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n  <title>Workflow Error</title>\n  <style>\n    * { margin: 0; padding: 0; box-sizing: border-box; }\n    body {\n      background-color: #0a0908;\n      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;\n      padding: 48px 16px;\n    }\n    .wrapper { max-width: 520px; margin: 0 auto; }\n\n    .strip {\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding-bottom: 20px;\n      border-bottom: 1px solid #22333b;\n      margin-bottom: 40px;\n    }\n    .strip-brand {\n      font-size: 11px;\n      font-weight: 700;\n      color: #c6ac8f;\n      letter-spacing: 0.14em;\n      text-transform: uppercase;\n    }\n    .strip-tag {\n      font-size: 11px;\n      color: #5e503f;\n      letter-spacing: 0.08em;\n      text-transform: uppercase;\n    }\n\n    .error-center {\n      text-align: center;\n      margin-bottom: 48px;\n    }\n    .error-icon {\n      font-size: 36px;\n      margin-bottom: 16px;\n    }\n    .error-title {\n      font-size: 32px;\n      font-weight: 700;\n      color: #eae0d5;\n      letter-spacing: -0.02em;\n      margin-bottom: 8px;\n    }\n    .error-sub {\n      font-size: 13px;\n      color: #5e503f;\n      letter-spacing: 0.04em;\n    }\n\n    .alert-box {\n      border: 1px solid #22333b;\n      border-left: 3px solid #eae0d5;\n      padding: 20px;\n      margin-bottom: 32px;\n    }\n    .alert-box-label {\n      font-size: 10px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.12em;\n      margin-bottom: 8px;\n    }\n    .alert-box-workflow {\n      font-size: 16px;\n      font-weight: 600;\n      color: #eae0d5;\n    }\n\n    .list { border-top: 1px solid #22333b; margin-bottom: 36px; }\n    .list-row {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      padding: 13px 0;\n      border-bottom: 1px solid #22333b;\n    }\n    .list-key {\n      font-size: 11px;\n      color: #5e503f;\n      text-transform: uppercase;\n      letter-spacing: 0.1em;\n    }\n    .list-val {\n      font-size: 13px;\n      color: #eae0d5;\n      font-weight: 500;\n      text-align: right;\n    }\n\n    .message {\n      font-size: 13px;\n      color: #5e503f;\n      line-height: 1.8;\n      margin-bottom: 36px;\n      padding-left: 14px;\n      border-left: 2px solid #22333b;\n    }\n\n    .cta {\n      padding-top: 24px;\n      border-top: 1px solid #22333b;\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      gap: 20px;\n    }\n    .cta-note {\n      font-size: 11px;\n      color: #5e503f;\n      line-height: 1.6;\n    }\n    .cta-btn {\n      display: inline-block;\n      background-color: #eae0d5;\n      color: #0a0908;\n      text-decoration: none;\n      font-size: 11px;\n      font-weight: 700;\n      letter-spacing: 0.1em;\n      text-transform: uppercase;\n      padding: 12px 20px;\n      border-radius: 2px;\n      white-space: nowrap;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n\n    <div class=\"strip\">\n      <div class=\"strip-brand\">Invoice Pipeline</div>\n      <div class=\"strip-tag\">System alert</div>\n    </div>\n\n    <div class=\"error-center\">\n      <div class=\"error-icon\">⚠</div>\n      <div class=\"error-title\">Workflow error</div>\n      <div class=\"error-sub\">An automated workflow failed and requires your attention</div>\n    </div>\n\n    <div class=\"alert-box\">\n      <div class=\"alert-box-label\">Failed workflow</div>\n      <div class=\"alert-box-workflow\">{{ $workflow.name }}</div>\n    </div>\n      <div class=\"list-row\">\n        <div class=\"list-key\">Time</div>\n        <div class=\"list-val\">{{ $now }}</div>\n      </div>\n\n      </div>\n    </div>\n\n    <div class=\"message\">\n      Please review the workflow as soon as possible to avoid missing reminders.\n      Check the n8n execution log for the full error trace and re-run manually if needed.\n    </div>\n\n    <div class=\"cta\">\n      <div class=\"cta-note\">\n        This is an automated alert.<br/>\n        No reminders were sent during this execution.\n      </div>\n      <a class=\"cta-btn\" href=\"http://localhost:5678\">\n        Open n8n →\n      </a>\n    </div>\n\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -160
+      ],
+      "id": "2f644347-f816-412d-90c5-2ecf4556f05b",
+      "name": "Send a message5",
+      "webhookId": "003fbe5b-4bb0-4399-93eb-dddcd625b298",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CiFvLis362JeVgoX",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        []
+      ]
+    },
+    "Trigger-REPORT": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger-PENDING": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger-OVERDUE": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e4c2bbb2-2607-4e50-9be2-17ff12b40395",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4481f59142b94cb577a5609247ddb3a88b31febed091edfeb8ccb0cc867fd097"
+  },
+  "id": "6d56MFKuyIArTqYg",
+  "tags": []
+}
